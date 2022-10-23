@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import pymysql
 import time
+import fake_useragent
 # 服务器
 conn = pymysql.Connect(host='106.13.1.144',port=3306,user='database1',password='admin',database='database1',charset='utf8',ssl={'ssl':{}})
 cursor = conn.cursor()
@@ -16,8 +17,9 @@ cursor = conn.cursor()
 # 网络请求
 for i in range(1,200):
     url = 'https://www.kuaidaili.com/free/inha/%d/'%i
+    UA = fake_useragent.UserAgent()
     headers = {
-        'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36"
+        'User-Agent': UA.data_randomize
     }
     resp = requests.get(url = url,headers = headers)
     resp.close()
