@@ -63,65 +63,68 @@ class BossproDownloaderMiddleware:
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the downloader middleware does not modify the
     # passed objects.
-    def get_http_proxy(self):
-        time.sleep(1)
-        try:
-            resp = requests.get("http://127.0.0.1:5010/get/").json()
-            return resp
-        except:
-            # print('请求代理接口出错，重新请求')
-            return self.get_http_proxy()
-    def delete_proxy(self,proxy):
-        # pass
-        requests.get("http://127.0.0.1:5010/delete/?proxy={}".format(proxy))
-    def get_random_proxy_response(self,request):
-        # print('随机获取ip')
-        proxy = self.get_http_proxy().get("proxy")
-        if proxy:
-            # try:
-            html = requests.get(request.url, headers=headers, proxies={"http": f"http://{proxy}"})
-            # 使用代理访问
-            if html.status_code == 200:
-                resp_text = json.loads(html.text)
-                if resp_text['code'] == 5002:
-                    self.delete_proxy(proxy)
-                    # print(f'代理访问xxxx失败，删除无效代理{proxy}')
-                    return self.get_random_proxy_response()
-                # print(f'代理访问xxxxx成功{proxy},{resp_text["code"]}')
-                return html
-            else:
-                # print(f'访问xxxxx失败{html.status_code}，重新获取代理')
-                self.delete_proxy(proxy)
-                return self.get_random_proxy_response()
-            # except:
-            #     print('访问xxxxx出错了，重新获取代理')
-            #     return self.get_random_proxy()
-        else:
-            print('没有足够代理====================等待30秒')
-            time.sleep(30)
-            return self.get_random_proxy_response()
-
+    # def get_http_proxy(self):
+    #     time.sleep(1)
+    #     try:
+    #         resp = requests.get("http://127.0.0.1:5010/get/").json()
+    #         return resp
+    #     except:
+    #         # print('请求代理接口出错，重新请求')
+    #         return self.get_http_proxy()
+    #
+    #
+    # def delete_proxy(self,proxy):
+    #     # pass
+    #     requests.get("http://127.0.0.1:5010/delete/?proxy={}".format(proxy))
+    # def get_random_proxy_response(self,request):
+    #     # print('随机获取ip')
+    #     proxy = self.get_http_proxy().get("proxy")
+    #     if proxy:
+    #         # try:
+    #         html = requests.get(request.url, headers=headers, proxies={"http": f"http://{proxy}"})
+    #         # 使用代理访问
+    #         if html.status_code == 200:
+    #             resp_text = json.loads(html.text)
+    #             if resp_text['code'] == 5002:
+    #                 self.delete_proxy(proxy)
+    #                 # print(f'代理访问xxxx失败，删除无效代理{proxy}')
+    #                 return self.get_random_proxy_response()
+    #             # print(f'代理访问xxxxx成功{proxy},{resp_text["code"]}')
+    #             return html
+    #         else:
+    #             # print(f'访问xxxxx失败{html.status_code}，重新获取代理')
+    #             self.delete_proxy(proxy)
+    #             return self.get_random_proxy_response()
+    #         # except:
+    #         #     print('访问xxxxx出错了，重新获取代理')
+    #         #     return self.get_random_proxy()
+    #     else:
+    #         print('没有足够代理====================等待30秒')
+    #         time.sleep(30)
+    #         return self.get_random_proxy_response()
+    #
     def process_request(self, request, spider):
         request.headers["User-Agent"] = random.choice(USER_AGENTS)
+        print('拦截请求')
         return None
 
     def process_response(self, request, response, spider):
-        # print('拦截响应')
-        if "job_detail" in request.url:
-            # print('详情页')
-            # print(f'test meta data is {request.meta["item"]}')
-            bro = spider.bro
-            bro.get(request.url)
-            time.sleep(4)
-            page_text = bro.page_source  # 包含了动态加载的新闻数据
-            res = HtmlResponse(url=request.url, body=page_text, encoding='utf-8', request=request)
-            print(f'return respose an detail_url is {request.url}')
-            return res
-        else:
-            resp = self.get_random_proxy_response(request)
-            res = TextResponse(url=request.url, encoding='utf-8', body=resp.text)
-            print(f'return respose an page_url is {request.url}')
-            return res
+        print('拦截响应')
+        # if "job_detail" in request.url:
+        #     # print('详情页')
+        #     # print(f'test meta data is {request.meta["item"]}')
+        bro = spider.bro
+        bro.get(request.url)
+        time.sleep(4)
+        page_text = bro.page_source  # 包含了动态加载的新闻数据
+        res = HtmlResponse(url=request.url, body=page_text, encoding='utf-8', request=request)
+        print(f'return respose an detail_url is {request.url}')
+        return res
+        # else:
+            # resp = self.get_random_proxy_response(request)
+            # res = TextResponse(url=request.url, encoding='utf-8', body=resp.text)
+            # print(f'return respose an page_url is {request.url}')
+            # return res
 
 
 
